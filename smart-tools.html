@@ -478,12 +478,9 @@
                     </div>
                     <h1 class="text-xl font-bold text-dys-blue">الأدوات الذكية</h1>
                 </div>
-                <!-- Hamburger Menu Button -->
-                <button class="hamburger-menu md:hidden" id="hamburger-btn" onclick="toggleMobileMenu()">
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                </button>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-6">
                     <a href="index.html" class="text-dys-gray hover:text-dys-cyan transition-colors">الرئيسية</a>
                     <a href="map.html" class="text-dys-gray hover:text-dys-cyan transition-colors">الخريطة</a>
                     <a href="smart-tools.html" class="text-dys-cyan font-semibold">الأدوات</a>
@@ -491,13 +488,12 @@
                     <a href="settings.html" class="text-dys-gray hover:text-dys-cyan transition-colors">الإعدادات</a>
                 </div>
                 
-                <div class="flex items-center space-x-3">
-                    <button class="p-2 rounded-lg hover:bg-dys-light-gray transition-colors">
-                        <svg class="w-5 h-5 text-dys-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12"></path>
-                        </svg>
-                    </button>
-                </div>
+                <!-- Hamburger Menu Button -->
+                <button class="hamburger-menu md:hidden" id="hamburger-btn" onclick="toggleMobileMenu()">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
             </div>
         </div>
     </header>
