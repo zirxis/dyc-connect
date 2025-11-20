@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#00AEEF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>الخريطة التفاعلية - DYS-CONNECT</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dys-cyan': '#00AEEF',
+                        'dys-orange': '#F39200',
+                        'dys-green': '#8BC643',
+                        'dys-blue': '#1E3A8A',
+                        'dys-gray': '#6B7280',
+                        'dys-light-gray': '#F3F4F6'
+                    },
+                    fontFamily: {
+                        'arabic': ['Cairo', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .nav-bottom {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 174, 239, 0.1);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active {
+            color: #00AEEF;
+            transform: translateY(-2px);
+        }
+        
+        /* Glassmorphism effects */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Better link focus states */
+        a:focus, button:focus {
+            outline: 2px solid #00AEEF;
+            outline-offset: 2px;
+        }
+        
+        /* Enhanced cards with better shadows */
+        .card {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Loading animation */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        .loading {
+            animation: shimmer 2s infinite;
+            background: linear-gradient(90deg, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-size: 1000px 100%;
+        }
+        
+        /* Improved scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #00AEEF;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0099d6;
+        }
+        
+        #map {
+            height: 500px;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        .map-container {
+            position: relative;
+        }
+        
+        .map-controls {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1000;
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .marker-popup {
+            min-width: 250px;
+        }
+        
+        .role-filter {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .role-filter.active {
+            background-color: #00AEEF;
+            color: white;
+        }
+        
+        .connection-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .connection-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 174, 239, 0.15);
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-online {
+            background-color: #8BC643;
+        }
+        
+        .status-busy {
+            background-color: #F39200;
+        }
+        
+        .status-offline {
+            background-color: #6B7280;
+        }
+        
+        .floating-search {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+        
+        .search-input {
+            background: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 250px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 4px 12px rgba(0, 174, 239, 0.2);
+        }
+		@media (max-width: 768px) {
+    .max-w-7xl {
+        max-width: 100% !important;
+        padding: 0 1rem;
+    }
+    
+    .hidden.md\\:flex {
+        display: none !important;
+    }
+    
+    .md\\:hidden {
+        display: block !important;
+    }
+    
+    /* تحسين النصوص للشاشات الصغيرة */
+    .text-4xl, .text-5xl {
+        font-size: 1.75rem !important;
+        line-height: 2rem !important;
+    }
+    
+    .text-2xl {
+        font-size: 1.5rem !important;
+    }
+    
+    .text-xl {
+        font-size: 1.25rem !important;
+    }
+    
+    /* تحسين الهيدر */
+    .h-16 {
+        height: 4rem !important;
+        padding: 0 1rem;
+    }
+    
+    /* تحسين البادنج */
+    .py-12 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .px-4 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    
+    /* تحسين الـ grid */
+    .grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3 {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+    
+    /* تحسين الـ cards */
+    .p-6 {
+        padding: 1rem !important;
+    }
+    
+    /* منع التكبير في حقول الإدخال على iOS */
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .px-4 {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    
+    .text-lg {
+        font-size: 1rem !important;
+    }
+    
+    .p-4 {
+        padding: 0.75rem !important;
+    }
+    
+    .gap-6 {
+        gap: 1rem !important;
+    }
+}
+
+/* تحسينات للأجهزة التي تستخدم اللمس */
+@media (hover: none) and (pointer: coarse) {
+    .card-hover:hover {
+        transform: none !important;
+    }
+    
+    .card-hover:active {
+        transform: scale(0.98) !important;
+        opacity: 0.95 !important;
+    }
+    
+    .nav-item:hover {
+        transform: none !important;
+    }
+    
+    button, a {
+        min-height: 48px !important;
+        min-width: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    button {
+        -webkit-tap-highlight-color: rgba(0, 174, 239, 0.2) !important;
+    }
+}
+
+/* تحسين الأداء على الهواتف */
+@media (max-width: 768px) {
+    * {
+        -webkit-overflow-scrolling: touch;
+        -webkit-touch-callout: none;
+    }
+    
+    body {
+        -webkit-font-smoothing: antialiased;
+        -webkit-app-region: no-drag;
+        text-rendering: optimizeSpeed;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="search"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px !important;
+        padding: 12px !important;
+        border-radius: 8px !important;
+        border: 2px solid #E5E7EB !important;
+        min-height: 44px !important;
+    }
+    
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #00AEEF !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.1) !important;
+    }
+    
+    button {
+        min-height: 48px !important;
+        padding: 12px 16px !important;
+        font-size: 16px !important;
+        border-radius: 8px !important;
+    }
+}
+    </style>
+</head>
+<body class="font-arabic bg-gradient-to-br from-dys-light-gray to-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-dys-cyan/10 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <button onclick="window.history.back()" class="p-2 rounded-lg hover:bg-dys-light-gray transition-colors">
+                        <svg class="w-5 h-5 text-dys-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                    </button>
+                    <div class="w-10 h-10">
+                        <img src="resources/logo.jpg" alt="DYS-CONNECT Logo" class="h-10 w-auto object-contain rounded-lg">
+                    </div>
+                    <h1 class="text-xl font-bold text-dys-blue">الخريطة التفاعلية</h1>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-dys-gray hover:text-dys-cyan transition-colors">الرئيسية</a>
+                    <a href="map.html" class="text-dys-cyan font-semibold">الخريطة</a>
+                    <a href="smart-tools.html" class="text-dys-gray hover:text-dys-cyan transition-colors">الأدوات</a>
+                    <a href="messaging.html" class="text-dys-gray hover:text-dys-cyan transition-colors">الرسائل</a>
+                    <a href="settings.html" class="text-dys-gray hover:text-dys-cyan transition-colors">الإعدادات</a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="hamburger-btn" class="md:hidden p-3 rounded-lg hover:bg-dys-light-gray transition-all duration-300 flex flex-col justify-center items-center gap-1.5 relative z-50" onclick="toggleMobileMenu()" style="width: 44px; height: 44px;">
+                    <span class="hamburger-line w-5 h-0.5 bg-dys-gray rounded-full transition-all duration-300"></span>
+                    <span class="hamburger-line w-5 h-0.5 bg-dys-gray rounded-full transition-all duration-300"></span>
+                    <span class="hamburger-line w-5 h-0.5 bg-dys-gray rounded-full transition-all duration-300"></span>
+                </button>
+                
+                <div class="flex items-center space-x-3">
+                    <button onclick="centerOnUser()" class="p-2 rounded-lg hover:bg-dys-light-gray transition-colors">
+                        <svg class="w-5 h-5 text-dys-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Map Section -->
+    <section class="py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Filters Sidebar -->
+                <div class="lg:w-1/3">
+                    <div class="filter-card rounded-2xl p-6 mb-6">
+                        <h3 class="text-lg font-bold text-dys-blue mb-4">تصفية النتائج</h3>
+                        
+                        <!-- Role Filters -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-dys-blue mb-3">الدور</h4>
+                            <div class="space-y-2">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" class="role-checkbox" data-role="mother" checked onchange="toggleRoleFilter('mother')">
+                                    <span class="text-sm">أمهات</span>
+                                    <div class="w-3 h-3 bg-dys-cyan rounded-full"></div>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" class="role-checkbox" data-role="teacher" checked onchange="toggleRoleFilter('teacher')">
+                                    <span class="text-sm">معلمين</span>
+                                    <div class="w-3 h-3 bg-dys-orange rounded-full"></div>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" class="role-checkbox" data-role="specialist" checked onchange="toggleRoleFilter('specialist')">
+                                    <span class="text-sm">مختصين</span>
+                                    <div class="w-3 h-3 bg-dys-green rounded-full"></div>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" class="role-checkbox" data-role="institution" checked onchange="toggleRoleFilter('institution')">
+                                    <span class="text-sm">مؤسسات</span>
+                                    <div class="w-3 h-3 bg-dys-blue rounded-full"></div>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" class="role-checkbox" data-role="researcher" checked onchange="toggleRoleFilter('researcher')">
+                                    <span class="text-sm">باحثين</span>
+                                    <div class="w-3 h-3 bg-dys-gray rounded-full"></div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Distance Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-dys-blue mb-3">المسافة</h4>
+                            <select id="distance-filter" class="w-full p-2 border border-dys-light-gray rounded-lg focus:border-dys-cyan focus:outline-none" onchange="updateDistanceFilter()">
+                                <option value="5">خلال 5 كم</option>
+                                <option value="10" selected>خلال 10 كم</option>
+                                <option value="25">خلال 25 كم</option>
+                                <option value="50">خلال 50 كم</option>
+                                <option value="100">خلال 100 كم</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Services Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-dys-blue mb-3">الخدمات</h4>
+                            <div class="space-y-2">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" class="service-checkbox" data-service="assessment" checked>
+                                    <span class="text-sm">تقييم واختبار</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" class="service-checkbox" data-service="therapy" checked>
+                                    <span class="text-sm">علاج وتدخل</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" class="service-checkbox" data-service="consultation" checked>
+                                    <span class="text-sm">استشارات</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" class="service-checkbox" data-service="training" checked>
+                                    <span class="text-sm">تدريب</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button onclick="applyFilters()" class="w-full bg-dys-cyan text-white py-2 rounded-lg hover:bg-dys-cyan/90 transition-colors">
+                            تطبيق التصفية
+                        </button>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-dys-blue mb-4">إحصائيات سريعة</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-dys-gray">المستخدمين النشطين</span>
+                                <span class="font-bold text-dys-cyan" id="active-users">127</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-dys-gray">المتصلون الآن</span>
+                                <span class="font-bold text-dys-green" id="online-now">43</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-dys-gray">الجلسات اليوم</span>
+                                <span class="font-bold text-dys-orange" id="sessions-today">89</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Map Container -->
+                <div class="lg:w-2/3">
+                    <div class="map-container bg-white rounded-2xl shadow-lg p-4">
+                        <div class="floating-search">
+                            <input type="text" class="search-input" placeholder="ابحث عن مختص، مدرسة، أو منطقة..." id="search-input">
+                        </div>
+                        
+                        <div id="map"></div>
+                        
+                        <!-- Map Legend -->
+                        <div class="absolute bottom-4 left-4 bg-white rounded-lg p-3 shadow-lg">
+                            <h4 class="font-semibold text-dys-blue text-sm mb-2">دليل الرموز</h4>
+                            <div class="space-y-1">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-dys-cyan rounded-full"></div>
+                                    <span class="text-xs text-dys-gray">أم</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-dys-orange rounded-full"></div>
+                                    <span class="text-xs text-dys-gray">معلم</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-dys-green rounded-full"></div>
+                                    <span class="text-xs text-dys-gray">مختص</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-dys-blue rounded-full"></div>
+                                    <span class="text-xs text-dys-gray">مؤسسة</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-dys-gray rounded-full"></div>
+                                    <span class="text-xs text-dys-gray">باحث</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connections List -->
+    <section class="py-8 px-4 sm:px-6 lg:px-8 bg-white/50">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-dys-blue">الاتصالات المقترحة</h3>
+                <div class="flex space-x-2">
+                    <button onclick="refreshConnections()" class="bg-dys-light-gray text-dys-gray px-4 py-2 rounded-lg hover:bg-dys-gray/10 transition-colors">
+                        تحديث
+                    </button>
+                    <button onclick="showAllConnections()" class="bg-dys-cyan text-white px-4 py-2 rounded-lg hover:bg-dys-cyan/90 transition-colors">
+                        عرض الكل
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="connections-grid">
+                <!-- Connection cards will be populated here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Connection Request Modal -->
+    <div id="connection-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-dys-blue">طلب اتصال</h3>
+                <button onclick="closeConnectionModal()" class="text-dys-gray hover:text-dys-cyan">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="modal-content">
+                <!-- Modal content will be populated here -->
+            </div>
+            
+            <div class="flex space-x-3 mt-6">
+                <button onclick="sendConnectionRequest()" class="flex-1 bg-dys-cyan text-white py-2 rounded-lg hover:bg-dys-cyan/90 transition-colors">
+                    إرسال الطلب
+                </button>
+                <button onclick="closeConnectionModal()" class="flex-1 bg-dys-light-gray text-dys-gray py-2 rounded-lg hover:bg-dys-gray/10 transition-colors">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="nav-bottom fixed bottom-0 left-0 right-0 z-40 md:hidden">
+        <div class="flex justify-around items-center py-2">
+            <a href="index.html" class="nav-item flex flex-col items-center p-2">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                <span class="text-xs">الرئيسية</span>
+            </a>
+            
+            <a href="map.html" class="nav-item active flex flex-col items-center p-2">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span class="text-xs">الخريطة</span>
+            </a>
+            
+            <a href="smart-tools.html" class="nav-item flex flex-col items-center p-2">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span class="text-xs">الأدوات</span>
+            </a>
+            
+            <a href="messaging.html" class="nav-item flex flex-col items-center p-2">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                <span class="text-xs">الرسائل</span>
+            </a>
+            
+            <a href="settings.html" class="nav-item flex flex-col items-center p-2">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span class="text-xs">الحساب</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Add bottom padding to prevent content being hidden behind nav -->
+    <div class="h-20 md:hidden"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Map functionality
+        let map;
+        let markers = [];
+        let userLocation = null;
+        let currentFilters = {
+            roles: ['mother', 'teacher', 'specialist', 'institution', 'researcher'],
+            distance: 10,
+            services: ['assessment', 'therapy', 'consultation', 'training']
+        };
+        
+        // Sample data
+        const sampleConnections = [
+            {
+                id: 1,
+                name: 'الدكتور هاشمي',
+                role: 'specialist',
+                specialty: 'أخصائي علاج النطق و الكلام ',
+                lat: 36.7783,
+                lng: 3.0588,
+                    distance: '2.5 كم',
+                rating: 4.8,
+                    status: 'online',
+                services: ['assessment', 'therapy', 'consultation'],
+                image: 'resources/specialist-portrait.jpg',
+                availability: 'متاح اليوم'
+            },
+            {
+                id: 2,
+                name: 'سارة أحمد',
+                role: 'mother',
+                specialty: 'أم لطفل يعاني من صعوبات تعلم',
+                lat: 36.7767,
+                lng: 3.0601,
+                distance: '1.8 كم',
+                rating: 4.9,
+                status: 'online',
+                services: ['consultation'],
+                image: 'resources/child-learning.jpg',
+                availability: 'متاح للتواصل'
+            },
+            {
+                id: 3,
+                name: 'مدرسة النور',
+                role: 'institution',
+                specialty: 'مدرسة متخصصة في صعوبات التعلم',
+                lat: 36.7824,
+                lng: 3.0567,
+                distance: '3.1 كم',
+                rating: 4.6,
+                status: 'busy',
+                services: ['assessment', 'therapy', 'training'],
+                image: 'resources/institution-building.jpg',
+                availability: 'جلسات متوفرة غداً'
+            },
+            {
+                id: 4,
+                name: 'أ. خالد مصطفى',
+                role: 'teacher',
+                specialty: 'معلم صف رابع ابتدائي',
+                lat: 36.7745,
+                lng: 3.0623,
+                distance: '2.2 كم',
+                rating: 4.7,
+                status: 'online',
+                services: ['consultation', 'training'],
+                image: 'resources/specialist-portrait.jpg',
+                availability: 'متاح للتشاور المهني'
+            },
+            {
+                id: 5,
+                name: 'د. محمد الباحث',
+                role: 'researcher',
+                specialty: 'باحث في مجال صعوبات التعلم',
+                lat: 36.7801,
+                lng: 3.0545,
+                distance: '2.9 كم',
+                rating: 4.5,
+                status: 'offline',
+                services: ['consultation'],
+                image: 'resources/specialist-portrait.jpg',
+                availability: 'متاح للمشاريع البحثية'
+            },
+            {
+                id: 6,
+                name: 'أم يوسف',
+                role: 'mother',
+                specialty: 'أم لطفل توحدي',
+                lat: 36.7798,
+                lng: 3.0598,
+                distance: '2.1 كم',
+                rating: 4.8,
+                status: 'online',
+                services: ['consultation'],
+                image: 'resources/child-learning.jpg',
+                availability: 'متاح للدعم والمشاركة'
+            }
+        ];
+        
+        // Initialize map
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMap();
+            loadConnections();
+            updateConnectionsList();
+        });
+        
+        function initializeMap() {
+            // Initialize map centered on Algiers
+            map = L.map('map').setView([36.7783, 3.0588], 13);
+            
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Try to get user location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    // Add user location marker
+                    L.marker([userLocation.lat, userLocation.lng], {
+                        icon: L.divIcon({
+                            className: 'user-location-marker',
+                            html: '<div style="background: #00AEEF; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 10]
+                        })
+                    }).addTo(map).bindPopup('موقعك الحالي');
+                    
+                    // Center map on user location
+                    map.setView([userLocation.lat, userLocation.lng], 15);
+                });
+            }
+        }
+        
+        function loadConnections() {
+            // Clear existing markers
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            
+            // Filter connections based on current filters
+            const filteredConnections = sampleConnections.filter(connection => {
+                return currentFilters.roles.includes(connection.role);
+            });
+            
+            // Add markers for each connection
+            filteredConnections.forEach(connection => {
+                const markerColor = getRoleColor(connection.role);
+                
+                const marker = L.marker([connection.lat, connection.lng], {
+                    icon: L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div style="background: ${markerColor}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer;"></div>`,
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    })
+                }).addTo(map);
+                
+                // Create popup content
+                const popupContent = createPopupContent(connection);
+                marker.bindPopup(popupContent);
+                
+                markers.push(marker);
+            });
+        }
+        
+        function getRoleColor(role) {
+            const colors = {
+                mother: '#00AEEF',
+                teacher: '#F39200',
+                specialist: '#8BC643',
+                institution: '#1E3A8A',
+                researcher: '#6B7280'
+            };
+            return colors[role] || '#6B7280';
+        }
+        
+        function createPopupContent(connection) {
+            const statusClass = connection.status === 'online' ? 'status-online' : 
+                               connection.status === 'busy' ? 'status-busy' : 'status-offline';
+            
+            return `
+                <div class="marker-popup">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <img src="${connection.image}" alt="${connection.name}" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <div class="font-semibold text-dys-blue">${connection.name}</div>
+                            <div class="text-sm text-dys-gray">${connection.specialty}</div>
+                            <div class="flex items-center space-x-2 text-xs text-dys-gray">
+                                <span class="status-indicator ${statusClass}"></span>
+                                <span>${connection.availability}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="text-sm text-dys-gray">
+                            <span>⭐ ${connection.rating}</span>
+                            <span class="mx-1">•</span>
+                            <span>${connection.distance}</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="showConnectionModal(${connection.id})" class="flex-1 bg-dys-cyan text-white py-2 px-3 rounded-lg text-sm hover:bg-dys-cyan/90 transition-colors">
+                            تواصل
+                        </button>
+                        <button onclick="viewProfile(${connection.id})" class="flex-1 bg-dys-light-gray text-dys-gray py-2 px-3 rounded-lg text-sm hover:bg-dys-gray/10 transition-colors">
+                            الملف
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateConnectionsList() {
+            const grid = document.getElementById('connections-grid');
+            grid.innerHTML = '';
+            
+            // Filter connections
+            const filteredConnections = sampleConnections.filter(connection => {
+                return currentFilters.roles.includes(connection.role);
+            });
+            
+            // Create connection cards
+            filteredConnections.forEach(connection => {
+                const card = createConnectionCard(connection);
+                grid.appendChild(card);
+            });
+        }
+        
+        function createConnectionCard(connection) {
+            const card = document.createElement('div');
+            card.className = 'connection-card bg-white rounded-2xl shadow-lg p-6';
+            
+            const statusClass = connection.status === 'online' ? 'status-online' : 
+                               connection.status === 'busy' ? 'status-busy' : 'status-offline';
+            
+            const roleColor = getRoleColor(connection.role);
+            
+            card.innerHTML = `
+                <div class="flex items-center space-x-4 mb-4">
+                    <div class="relative">
+                        <img src="${connection.image}" alt="${connection.name}" class="w-16 h-16 rounded-full object-cover">
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 ${roleColor} rounded-full flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                ${getRoleIcon(connection.role)}
+                            </svg>
+                        </div>
+                        <div class="absolute top-0 left-0 w-3 h-3 ${statusClass} rounded-full border-2 border-white"></div>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-dys-blue">${connection.name}</h4>
+                        <p class="text-sm text-dys-gray">${connection.specialty}</p>
+                        <div class="flex items-center space-x-2 text-xs text-dys-gray mt-1">
+                            <span>⭐ ${connection.rating}</span>
+                            <span>•</span>
+                            <span>${connection.distance}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-sm text-dys-gray mb-2">${connection.availability}</p>
+                    <div class="flex flex-wrap gap-1">
+                        ${connection.services.map(service => `
+                            <span class="bg-dys-light-gray text-dys-gray px-2 py-1 rounded text-xs">${getServiceName(service)}</span>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="flex space-x-2">
+                    <button onclick="showConnectionModal(${connection.id})" class="flex-1 bg-dys-cyan text-white py-2 rounded-lg hover:bg-dys-cyan/90 transition-colors text-sm">
+                        تواصل
+                    </button>
+                    <button onclick="viewProfile(${connection.id})" class="flex-1 bg-dys-light-gray text-dys-gray py-2 rounded-lg hover:bg-dys-gray/10 transition-colors text-sm">
+                        الملف
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        function getRoleIcon(role) {
+            const icons = {
+                mother: '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>',
+                teacher: '<path d="M12 14l9-5-9-5-9 5 9 5z"></path><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>',
+                specialist: '<path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>',
+                institution: '<path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>',
+                researcher: '<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>'
+            };
+            return icons[role] || icons.specialist;
+        }
+        
+        function getServiceName(service) {
+            const names = {
+                assessment: 'تقييم',
+                therapy: 'علاج',
+                consultation: 'استشارة',
+                training: 'تدريب'
+            };
+            return names[service] || service;
+        }
+        
+        function toggleRoleFilter(role) {
+            const checkbox = document.querySelector(`[data-role="${role}"]`);
+            if (checkbox.checked) {
+                if (!currentFilters.roles.includes(role)) {
+                    currentFilters.roles.push(role);
+                }
+            } else {
+                currentFilters.roles = currentFilters.roles.filter(r => r !== role);
+            }
+            
+            loadConnections();
+            updateConnectionsList();
+        }
+        
+        function updateDistanceFilter() {
+            const select = document.getElementById('distance-filter');
+            currentFilters.distance = parseInt(select.value);
+        }
+        
+        function applyFilters() {
+            loadConnections();
+            updateConnectionsList();
+            showNotification('تم تطبيق التصفية', 'success');
+        }
+        
+        function showConnectionModal(connectionId) {
+            const connection = sampleConnections.find(c => c.id === connectionId);
+            if (!connection) return;
+            
+            const modal = document.getElementById('connection-modal');
+            const content = document.getElementById('modal-content');
+            
+            content.innerHTML = `
+                <div class="flex items-center space-x-4 mb-4">
+                    <img src="${connection.image}" alt="${connection.name}" class="w-16 h-16 rounded-full object-cover">
+                    <div>
+                        <h4 class="font-bold text-dys-blue">${connection.name}</h4>
+                        <p class="text-sm text-dys-gray">${connection.specialty}</p>
+                        <div class="flex items-center space-x-2 text-xs text-dys-gray mt-1">
+                            <span>⭐ ${connection.rating}</span>
+                            <span>•</span>
+                            <span>${connection.distance}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-dys-blue mb-2">رسالة الطلب:</label>
+                    <textarea id="connection-message" rows="3" class="w-full p-3 border border-dys-light-gray rounded-lg focus:border-dys-cyan focus:outline-none resize-none" 
+                        placeholder="اكتب رسالتك هنا...">أرغب في التواصل معكم من خلال منصة DYS-CONNECT</textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-dys-blue mb-2">نوع التواصل:</label>
+                    <select id="connection-type" class="w-full p-2 border border-dys-light-gray rounded-lg focus:border-dys-cyan focus:outline-none">
+                        <option value="chat">دردشة نصية</option>
+                        <option value="voice">مكالمة صوتية</option>
+                        <option value="video">مكالمة فيديو</option>
+                        <option value="meeting">اجتماع حضوري</option>
+                    </select>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            modal.dataset.connectionId = connectionId;
+        }
+        
+        function closeConnectionModal() {
+            document.getElementById('connection-modal').classList.add('hidden');
+        }
+        
+        function sendConnectionRequest() {
+            const modal = document.getElementById('connection-modal');
+            const connectionId = parseInt(modal.dataset.connectionId);
+            const message = document.getElementById('connection-message').value;
+            const type = document.getElementById('connection-type').value;
+            
+            // Simulate sending request
+            showNotification('تم إرسال طلب الاتصال بنجاح', 'success');
+            closeConnectionModal();
+        }
+        
+        function viewProfile(connectionId) {
+            const connection = sampleConnections.find(c => c.id === connectionId);
+            showNotification(`عرض ملف ${connection.name}`, 'info');
+        }
+        
+        function centerOnUser() {
+            if (userLocation) {
+                map.setView([userLocation.lat, userLocation.lng], 15);
+            } else {
+                showNotification('لم يتم تحديد موقعك', 'warning');
+            }
+        }
+        
+        function refreshConnections() {
+            loadConnections();
+            updateConnectionsList();
+            showNotification('تم تحديث الاتصالات', 'success');
+        }
+        
+        function showAllConnections() {
+            // Reset filters
+            currentFilters.roles = ['mother', 'teacher', 'specialist', 'institution', 'researcher'];
+            document.querySelectorAll('.role-checkbox').forEach(cb => cb.checked = true);
+            
+            loadConnections();
+            updateConnectionsList();
+        }
+        
+        // Global functions
+        window.toggleRoleFilter = toggleRoleFilter;
+        window.updateDistanceFilter = updateDistanceFilter;
+        window.applyFilters = applyFilters;
+        window.showConnectionModal = showConnectionModal;
+        window.closeConnectionModal = closeConnectionModal;
+        window.sendConnectionRequest = sendConnectionRequest;
+        window.viewProfile = viewProfile;
+        window.centerOnUser = centerOnUser;
+        window.refreshConnections = refreshConnections;
+        window.showAllConnections = showAllConnections;
+    </script>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu-overlay" class="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+    
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="mobile-menu">
+        <div class="mobile-menu-header">
+            <h2 class="font-bold text-lg text-dys-blue">القائمة</h2>
+            <button class="mobile-menu-close" onclick="closeMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <nav class="py-4 space-y-2">
+            <a href="index.html" class="mobile-menu-item">
+                <span>الرئيسية</span>
+            </a>
+            <a href="map.html" class="mobile-menu-item active">
+                <span>الخريطة</span>
+            </a>
+            <a href="smart-tools.html" class="mobile-menu-item">
+                <span>الأدوات</span>
+            </a>
+            <a href="messaging.html" class="mobile-menu-item">
+                <span>الرسائل</span>
+            </a>
+            <a href="settings.html" class="mobile-menu-item">
+                <span>الإعدادات</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Mobile Menu Functions
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const hamburger = document.getElementById('hamburger-btn');
+            
+            if (!menu || !overlay || !hamburger) return;
+            
+            if (menu.classList.contains('active')) {
+                closeMobileMenu();
+            } else {
+                menu.classList.add('active');
+                overlay.classList.add('active');
+                hamburger.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const hamburger = document.getElementById('hamburger-btn');
+            
+            if (!menu || !overlay) return;
+            
+            menu.classList.remove('active');
+            overlay.classList.remove('active');
+            if (hamburger) hamburger.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Initialize mobile menu on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Close menu when clicking on links
+            document.querySelectorAll('.mobile-menu-item').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    closeMobileMenu();
+                });
+            });
+            
+            // Close menu when pressing Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeMobileMenu();
+                }
+            });
+        });
+    </script>
+    <script src="main.js"></script>
+</body>
+</html>

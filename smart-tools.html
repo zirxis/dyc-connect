@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#00AEEF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>الأدوات الذكية - DYS-CONNECT</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dys-cyan': '#00AEEF',
+                        'dys-orange': '#F39200',
+                        'dys-green': '#8BC643',
+                        'dys-blue': '#1E3A8A',
+                        'dys-gray': '#6B7280',
+                        'dys-light-gray': '#F3F4F6'
+                    },
+                    fontFamily: {
+                        'arabic': ['Cairo', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .nav-bottom {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 174, 239, 0.1);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active {
+            color: #00AEEF;
+            transform: translateY(-2px);
+        }
+        
+        /* Glassmorphism effects */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Better link focus states */
+        a:focus, button:focus {
+            outline: 2px solid #00AEEF;
+            outline-offset: 2px;
+        }
+        
+        /* Enhanced cards with better shadows */
+        .card {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 3px 6px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Loading animation */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        .loading {
+            animation: shimmer 2s infinite;
+            background: linear-gradient(90deg, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-size: 1000px 100%;
+        }
+        
+        /* Improved scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #00AEEF;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0099d6;
+        }
+        
+        /* Mobile Menu Styles */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 30;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 280px;
+            background: white;
+            z-index: 40;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+        
+        .mobile-menu-header {
+            padding: 1rem;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .mobile-menu-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6B7280;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+        }
+        
+        .mobile-menu-content {
+            padding: 1rem 0;
+        }
+        
+        .mobile-menu-item {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: #6B7280;
+            text-decoration: none;
+            border-bottom: 1px solid #F3F4F6;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-item:hover,
+        .mobile-menu-item.active {
+            background: #F3F4F6;
+            color: #00AEEF;
+            padding-right: 2rem;
+        }
+        
+        .mobile-menu-item svg {
+            display: inline-block;
+            margin-left: 0.5rem;
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+        }
+        
+        .hamburger-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0.5rem;
+        }
+        
+        .hamburger-line {
+            width: 24px;
+            height: 2.5px;
+            background: #6B7280;
+            margin: 4px 0;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .hamburger-menu.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+        
+        .hamburger-menu.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger-menu.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+        
+        @media (max-width: 768px) {
+            .hamburger-menu {
+                display: flex;
+            }
+        }
+        
+        .tool-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .tool-card.active {
+            background: linear-gradient(135deg, rgba(0, 174, 239, 0.1), rgba(139, 198, 67, 0.1));
+            border-color: #00AEEF;
+        }
+        
+        .upload-area {
+            border: 2px dashed #00AEEF;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area.dragover {
+            border-color: #8BC643;
+            background-color: rgba(139, 198, 67, 0.1);
+        }
+        
+        .mind-map-node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mind-map-node:hover {
+            transform: scale(1.1);
+        }
+        
+        .mind-map-connection {
+            stroke: #00AEEF;
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .typing-indicator {
+            animation: typing 1.5s infinite;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 1; }
+            30% { opacity: 0.5; }
+        }
+        
+        .exercise-card {
+            transition: all 0.3s ease;
+        }
+        
+        .exercise-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 174, 239, 0.15);
+        }
+        
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+		@media (max-width: 768px) {
+    .max-w-7xl {
+        max-width: 100% !important;
+        padding: 0 1rem;
+    }
+    
+    .hidden.md\\:flex {
+        display: none !important;
+    }
+    
+    .md\\:hidden {
+        display: block !important;
+    }
+    
+    /* تحسين النصوص للشاشات الصغيرة */
+    .text-4xl, .text-5xl {
+        font-size: 1.75rem !important;
+        line-height: 2rem !important;
+    }
+    
+    .text-2xl {
+        font-size: 1.5rem !important;
+    }
+    
+    .text-xl {
+        font-size: 1.25rem !important;
+    }
+    
+    /* تحسين الهيدر */
+    .h-16 {
+        height: 4rem !important;
+        padding: 0 1rem;
+    }
+    
+    /* تحسين البادنج */
+    .py-12 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .px-4 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    
+    /* تحسين الـ grid */
+    .grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3 {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+    
+    /* تحسين الـ cards */
+    .p-6 {
+        padding: 1rem !important;
+    }
+    
+    /* منع التكبير في حقول الإدخال على iOS */
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .px-4 {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    
+    .text-lg {
+        font-size: 1rem !important;
+    }
+    
+    .p-4 {
+        padding: 0.75rem !important;
+    }
+    
+    .gap-6 {
+        gap: 1rem !important;
+    }
+}
+
+/* تحسينات للأجهزة التي تستخدم اللمس */
+@media (hover: none) and (pointer: coarse) {
+    .card-hover:hover {
+        transform: none !important;
+    }
+    
+    .card-hover:active {
+        transform: scale(0.98) !important;
+        opacity: 0.95 !important;
+    }
+    
+    .nav-item:hover {
+        transform: none !important;
+    }
+    
+    button, a {
+        min-height: 48px !important;
+        min-width: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    button {
+        -webkit-tap-highlight-color: rgba(0, 174, 239, 0.2) !important;
+    }
+}
+
+/* تحسين الأداء على الهواتف */
+@media (max-width: 768px) {
+    * {
+        -webkit-overflow-scrolling: touch;
+        -webkit-touch-callout: none;
+    }
+    
+    body {
+        -webkit-font-smoothing: antialiased;
+        -webkit-app-region: no-drag;
+        text-rendering: optimizeSpeed;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="search"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px !important;
+        padding: 12px !important;
+        border-radius: 8px !important;
+        border: 2px solid #E5E7EB !important;
+        min-height: 44px !important;
+    }
+    
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #00AEEF !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.1) !important;
+    }
+    
+    button {
+        min-height: 48px !important;
+        padding: 12px 16px !important;
+        font-size: 16px !important;
+        border-radius: 8px !important;
+    }
+}
+    </style>
+</head>
+<body class="font-arabic bg-gradient-to-br from-dys-light-gray to-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-dys-cyan/10 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <button onclick="window.history.back()" class="p-2 rounded-lg hover:bg-dys-light-gray transition-colors">
+                        <svg class="w-5 h-5 text-dys-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                    </button>
+                    <div class="w-10 h-10">
+                        <img src="resources/logo.jpg" alt="DYS-CONNECT Logo" class="h-10 w-auto object-contain rounded-lg">
+                    </div>
+                    <h1 class="text-xl font-bold text-dys-blue">الأدوات الذكية</h1>
+                </div>
+                <!-- Hamburger Menu Button -->
+                <button class="hamburger-menu md:hidden" id="hamburger-btn" onclick="toggleMobileMenu()">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                    <a href="index.html" class="text-dys-gray hover:text-dys-cyan transition-colors">الرئيسية</a>
+                    <a href="map.html" class="text-dys-gray hover:text-dys-cyan transition-colors">الخريطة</a>
+                    <a href="smart-tools.html" class="text-dys-cyan font-semibold">الأدوات</a>
+                    <a href="messaging.html" class="text-dys-gray hover:text-dys-cyan transition-colors">الرسائل</a>
+                    <a href="settings.html" class="text-dys-gray hover:text-dys-cyan transition-colors">الإعدادات</a>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <button class="p-2 rounded-lg hover:bg-dys-light-gray transition-colors">
+                        <svg class="w-5 h-5 text-dys-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-dys-cyan/5 to-dys-green/5"></div>
+        <div class="floating-element absolute top-20 right-10 w-16 h-16 bg-dys-orange/20 rounded-full"></div>
+        <div class="floating-element absolute bottom-20 left-10 w-12 h-12 bg-dys-cyan/20 rounded-full" style="animation-delay: -2s;"></div>
+        
+        <div class="relative max-w-7xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-dys-blue mb-4">
+                أدوات ذكية لتسهيل التعلم
+            </h2>
+            <p class="text-lg text-dys-gray max-w-3xl mx-auto mb-8">
+                حوّلي المواد التعليمية المعقدة إلى محتوى مبسط وفعّال باستخدام تقنيات الذكاء الاصطناعي
+            </p>
+        </div>
+    </section>
+
+    <!-- Tools Navigation -->
+    <section class="py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="tool-card p-6 rounded-2xl cursor-pointer active" onclick="selectTool('summarizer')">
+                    <div class="w-12 h-12 bg-dys-cyan/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                        <svg class="w-6 h-6 text-dys-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-dys-blue text-center mb-2">ملخص الدروس</h3>
+                    <p class="text-sm text-dys-gray text-center">حوّلي النصوص والصور إلى ملاحظات مبسطة</p>
+                </div>
+                
+                <div class="tool-card p-6 rounded-2xl cursor-pointer" onclick="selectTool('mindmap')">
+                    <div class="w-12 h-12 bg-dys-orange/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                        <svg class="w-6 h-6 text-dys-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-dys-blue text-center mb-2">خريطة ذهنية</h3>
+                    <p class="text-sm text-dys-gray text-center">أنشئي خرائط ذهنية تفاعلية تلقائياً</p>
+                </div>
+                
+                <div class="tool-card p-6 rounded-2xl cursor-pointer" onclick="selectTool('exercise')">
+                    <div class="w-12 h-12 bg-dys-green/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                        <svg class="w-6 h-6 text-dys-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-dys-blue text-center mb-2">مدرب التمارين</h3>
+                    <p class="text-sm text-dys-gray text-center">تمارين تفاعلية مع ملاحظات فورية</p>
+                </div>
+                
+                <div class="tool-card p-6 rounded-2xl cursor-pointer" onclick="selectTool('writing')">
+                    <div class="w-12 h-12 bg-dys-blue/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                        <svg class="w-6 h-6 text-dys-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-dys-blue text-center mb-2">تدريب الكتابة</h3>
+                    <p class="text-sm text-dys-gray text-center">تدريبات متقدمة على الكتابة والإملاء</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tool Content Area -->
+    <section class="py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Lesson Summarizer Tool -->
+            <div id="summarizer-tool" class="tool-content">
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-dys-blue">ملخص الدروس</h3>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-dys-gray">آخر استخدام:</span>
+                            <span class="text-sm text-dys-cyan">منذ 15 دقيقة</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Input Section -->
+                        <div>
+                            <h4 class="text-lg font-semibold text-dys-blue mb-4">إدخال المحتوى</h4>
+                            
+                            <!-- Upload Area -->
+                            <div class="upload-area rounded-xl p-8 text-center mb-4" id="upload-area">
+                                <svg class="w-12 h-12 text-dys-cyan mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                <h5 class="text-lg font-semibold text-dys-blue mb-2">قم بإسقاط الملفات هنا</h5>
+                                <p class="text-dys-gray mb-4">أو انقر لاختيار ملف (PDF, DOC, TXT, JPG, PNG)</p>
+                                <input type="file" id="file-input" class="hidden" accept=".pdf,.doc,.txt,.jpg,.jpeg,.png" multiple>
+                                <button onclick="document.getElementById('file-input').click()" class="bg-dys-cyan text-white px-6 py-2 rounded-lg hover:bg-dys-cyan/90 transition-colors">
+                                    اختيار ملف
+                                </button>
+                            </div>
+                            
+                            <!-- Text Input -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-dys-blue mb-2">أو أدخلي النص يدوياً:</label>
+                                <textarea id="text-input" rows="6" class="w-full p-4 border border-dys-light-gray rounded-xl focus:border-dys-cyan focus:outline-none resize-none" 
+                                    placeholder="اكتبي هنا النص الذي تريدين تلخيصه..."></textarea>
+                            </div>
+                            
+                            <!-- Options -->
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-dys-blue mb-2">مستوى التبسيط:</label>
+                                    <select class="w-full p-3 border border-dys-light-gray rounded-xl focus:border-dys-cyan focus:outline-none">
+                                        <option value="simple">بسيط جداً</option>
+                                        <option value="normal" selected>معتدل</option>
+                                        <option value="advanced">متقدم</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-dys-blue mb-2">طول الملخص:</label>
+                                    <select class="w-full p-3 border border-dys-light-gray rounded-xl focus:border-dys-cyan focus:outline-none">
+                                        <option value="short">قصير (25%)</option>
+                                        <option value="medium" selected>متوسط (50%)</option>
+                                        <option value="long">طويل (75%)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button onclick="generateSummary()" class="w-full bg-dys-orange text-white py-3 rounded-xl hover:bg-dys-orange/90 transition-colors font-semibold">
+                                <span id="summarize-btn-text">إنشاء الملخص</span>
+                                <span id="summarize-loading" class="hidden typing-indicator">جاري المعالجة...</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Output Section -->
+                        <div>
+                            <h4 class="text-lg font-semibold text-dys-blue mb-4">الملخص الناتج</h4>
+                            <div id="summary-output" class="bg-dys-light-gray rounded-xl p-4 min-h-64">
+                                <div class="text-center text-dys-gray py-12">
+                                    <svg class="w-16 h-16 text-dys-cyan mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <p class="text-lg font-semibold text-dys-blue mb-2">المحتوى الملخص سيظهر هنا</p>
+                                    <p class="text-sm">بمجرد معالجة المحتوى، ستحصلين على ملخص مبسط مع نقاط رئيسية واضحة</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-2 mt-4">
+                                <button class="flex-1 bg-dys-cyan text-white py-2 rounded-lg hover:bg-dys-cyan/90 transition-colors">
+                                    حفظ الملخص
+                                </button>
+                                <button class="flex-1 bg-dys-light-gray text-dys-gray py-2 rounded-lg hover:bg-dys-gray/10 transition-colors">
+                                    مشاركة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Summaries -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h4 class="text-lg font-semibold text-dys-blue mb-4">الملخصات السابقة</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-4 bg-dys-light-gray rounded-xl">
+                            <div>
+                                <div class="font-semibold text-dys-blue">درس العلوم - النباتات</div>
+                                <div class="text-sm text-dys-gray">تم التلخيص من 5 صفحات إلى 1 صفحة</div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="text-dys-cyan hover:text-dys-cyan/80">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                                <button class="text-dys-orange hover:text-dys-orange/80">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-dys-light-gray rounded-xl">
+                            <div>
+                                <div class="font-semibold text-dys-blue">قواعد اللغة العربية</div>
+                                <div class="text-sm text-dys-gray">تم التلخيص من 3 صفحات إلى نصف صفحة</div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="text-dys-cyan hover:text-dys-cyan/80">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                                <button class="text-dys-orange hover:text-dys-orange/80">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-dys-light-gray rounded-xl">
+                            <div>
+                                <div class="font-semibold text-dys-blue">التاريخ - الحضارة الفينيقية</div>
+                                <div class="text-sm text-dys-gray">تم التلخيص من 4 صفحات إلى صفحة واحدة</div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="text-dys-cyan hover:text-dys-cyan/80">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                                <button class="text-dys-orange hover:text-dys-orange/80">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mind Map Tool -->
+            <div id="mindmap-tool" class="tool-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-dys-blue">خريطة ذهنية تفاعلية</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="exportMindMap()" class="bg-dys-green text-white px-4 py-2 rounded-lg hover:bg-dys-green/90 transition-colors">
+                                تصدير
+                            </button>
+                            <button onclick="saveMindMap()" class="bg-dys-cyan text-white px-4 py-2 rounded-lg hover:bg-dys-cyan/90 transition-colors">
+                                حفظ
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Input Section -->
+                        <div class="lg:col-span-1">
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-dys-blue mb-2">الموضوع الرئيسي:</label>
+                                <input type="text" id="mindmap-topic" class="w-full p-3 border border-dys-light-gray rounded-xl focus:border-dys-orange focus:outline-none" 
+                                    placeholder="مثلاً: النظام الشمسي" value="النظام الشمسي">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-dys-blue mb-2">العناصر الفرعية:</label>
+                                <div class="space-y-2 mb-4" id="subtopics-list">
+                                    <div class="flex space-x-2">
+                                        <input type="text" class="flex-1 p-2 border border-dys-light-gray rounded-lg focus:border-dys-orange focus:outline-none" 
+                                            placeholder="الشمس" value="الشمس">
+                                        <button onclick="removeSubtopic(this)" class="text-dys-gray hover:text-red-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <input type="text" class="flex-1 p-2 border border-dys-light-gray rounded-lg focus:border-dys-orange focus:outline-none" 
+                                            placeholder="الكواكب" value="الكواكب">
+                                        <button onclick="removeSubtopic(this)" class="text-dys-gray hover:text-red-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <input type="text" class="flex-1 p-2 border border-dys-light-gray rounded-lg focus:border-dys-orange focus:outline-none" 
+                                            placeholder="الأقمار" value="الأقمار">
+                                        <button onclick="removeSubtopic(this)" class="text-dys-gray hover:text-red-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button onclick="addSubtopic()" class="w-full bg-dys-light-gray text-dys-gray py-2 rounded-lg hover:bg-dys-gray/10 transition-colors">
+                                    + إضافة عنصر فرعي
+                                </button>
+                            </div>
+                            
+                            <button onclick="generateMindMap()" class="w-full bg-dys-orange text-white py-3 rounded-xl hover:bg-dys-orange/90 transition-colors font-semibold">
+                                إنشاء الخريطة الذهنية
+                            </button>
+                        </div>
+                        
+                        <!-- Mind Map Display -->
+                        <div class="lg:col-span-2">
+                            <div class="bg-dys-light-gray rounded-xl p-4 min-h-96">
+                                <div id="mindmap-container" class="w-full h-96 relative">
+                                    <svg id="mindmap-svg" class="w-full h-full">
+                                        <!-- Mind map will be generated here -->
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercise Trainer Tool -->
+            <div id="exercise-tool" class="tool-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-dys-blue">مدرب التمارين التفاعلية</h3>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-sm text-dys-gray">
+                                <span class="font-semibold">الإجابات الصحيحة:</span>
+                                <span class="text-dys-green" id="correct-answers">0</span>
+                            </div>
+                            <div class="text-sm text-dys-gray">
+                                <span class="font-semibold">الإجابات الخاطئة:</span>
+                                <span class="text-dys-orange" id="wrong-answers">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Exercise Categories -->
+                        <div>
+                            <h4 class="text-lg font-semibold text-dys-blue mb-4">اختيار النوع</h4>
+                            <div class="space-y-3">
+                                <button onclick="selectExerciseType('reading')" class="exercise-card w-full p-4 bg-dys-light-gray rounded-xl text-left hover:bg-dys-cyan/10 transition-colors">
+                                    <div class="font-semibold text-dys-blue">تمارين القراءة</div>
+                                    <div class="text-sm text-dys-gray">فهم النصوص والمفردات</div>
+                                </button>
+                                
+                                <button onclick="selectExerciseType('writing')" class="exercise-card w-full p-4 bg-dys-light-gray rounded-xl text-left hover:bg-dys-orange/10 transition-colors">
+                                    <div class="font-semibold text-dys-blue">تمارين الكتابة</div>
+                                    <div class="text-sm text-dys-gray">الإملاء والقواعد</div>
+                                </button>
+                                
+                                <button onclick="selectExerciseType('math')" class="exercise-card w-full p-4 bg-dys-light-gray rounded-xl text-left hover:bg-dys-green/10 transition-colors">
+                                    <div class="font-semibold text-dys-blue">تمارين الرياضيات</div>
+                                    <div class="text-sm text-dys-gray">عمليات حسابية ومشكلات</div>
+                                </button>
+                                
+                                <button onclick="selectExerciseType('attention')" class="exercise-card w-full p-4 bg-dys-light-gray rounded-xl text-left hover:bg-dys-blue/10 transition-colors">
+                                    <div class="font-semibold text-dys-blue">تمارين التركيز</div>
+                                    <div class="text-sm text-dys-gray">الانتباه والتركيز</div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Exercise Display -->
+                        <div class="lg:col-span-2">
+                            <div id="exercise-container" class="bg-dys-light-gray rounded-xl p-6 min-h-96">
+                                <div class="text-center py-12">
+                                    <svg class="w-16 h-16 text-dys-cyan mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <h5 class="text-lg font-semibold text-dys-blue mb-2">اختر نوع التمرين للبدء</h5>
+                                    <p class="text-sm text-dys-gray">اختر أحد أنواع التمارين من القائمة لبدء التدريب التفاعلي</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Writing Training Tool -->
+            <div id="writing-tool" class="tool-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-dys-blue">تدريب الكتابة والإملاء</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="startDictation()" class="bg-dys-cyan text-white px-4 py-2 rounded-lg hover:bg-dys-cyan/90 transition-colors">
+                                بدء الإملاء
+                            </button>
+                            <button onclick="checkWriting()" class="bg-dys-green text-white px-4 py-2 rounded-lg hover:bg-dys-green/90 transition-colors">
+                                تصحيح
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Writing Area -->
+                        <div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-dys-blue mb-2">النص المراد كتابته:</label>
+                                <div id="dictation-text" class="p-4 bg-dys-light-gray rounded-xl text-lg leading-relaxed">
+                                    اكتب النص التالي بدقة مع مراعاة علامات الترقيم والإملاء الصحيح:
+                                    <br><br>
+                                    <span class="text-dys-orange font-semibold">
+                                        "ذهب أحمد إلى المدرسة صباحاً ووجد أصدقاءه يلعبون في الساحة. انضم إليهم وبدأوا يلعبون كرة القدم معاً."
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-dys-blue mb-2">اكتب النص هنا:</label>
+                                <textarea id="writing-input" rows="8" class="w-full p-4 border border-dys-light-gray rounded-xl focus:border-dys-blue focus:outline-none resize-none text-lg" 
+                                    placeholder="اكتب النص أعلاه هنا بدقة..."></textarea>
+                            </div>
+                            
+                            <div class="flex space-x-2">
+                                <button onclick="clearWriting()" class="flex-1 bg-dys-light-gray text-dys-gray py-2 rounded-lg hover:bg-dys-gray/10 transition-colors">
+                                    مسح
+                                </button>
+                                <button onclick="showHint()" class="flex-1 bg-dys-orange text-white py-2 rounded-lg hover:bg-dys-orange/90 transition-colors">
+                                    تلميح
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Feedback Area -->
+                        <div>
+                            <div class="mb-4">
+                                <h4 class="text-lg font-semibold text-dys-blue mb-2">النتائج والتصحيح</h4>
+                                <div id="writing-feedback" class="bg-dys-light-gray rounded-xl p-4 min-h-64">
+                                    <div class="text-center text-dys-gray py-12">
+                                        <svg class="w-16 h-16 text-dys-blue mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <p class="text-lg font-semibold text-dys-blue mb-2">اكتب النص للحصول على التصحيح</p>
+                                        <p class="text-sm text-dys-gray">بعد كتابة النص، اضغطي على "تصحيح" للحصول على ملاحظات دقيقة</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-dys-blue/10 rounded-xl p-4">
+                                <h5 class="font-semibold text-dys-blue mb-2">نصائح للكتابة الصحيحة:</h5>
+                                <ul class="text-sm text-dys-gray space-y-1">
+                                    <li>• ركزي على الترقيم المناسب</li>
+                                    <li>• انتبهي للحروف التي تُكتب متصلة</li>
+                                    <li>• استخدمي الأفعال في زمنها الصحيح</li>
+                                    <li>• راجعي النص قبل الإرسال</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Weekly Recommendations -->
+    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white/50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-8">
+                <h3 class="text-2xl font-bold text-dys-blue mb-4">التوصيات الأسبوعية</h3>
+                <p class="text-dys-gray">اقتراحات مخصصة بناءً على تقدم طفلك</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+                    <div class="w-12 h-12 bg-dys-cyan/20 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-dys-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    <h4 class="text-lg font-semibold text-dys-blue mb-2">تمرين قراءة يومي</h4>
+                    <p class="text-dys-gray text-sm mb-4">ننصح بممارسة القراءة لمدة 15 دقيقة يومياً مع تمارين الفهم</p>
+                    <button class="bg-dys-cyan text-white px-4 py-2 rounded-lg hover:bg-dys-cyan/90 transition-colors">
+                        بدء التمرين
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+                    <div class="w-12 h-12 bg-dys-orange/20 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-dys-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="text-lg font-semibold text-dys-blue mb-2">تحسين الكتابة</h4>
+                    <p class="text-dys-gray text-sm mb-4">تمارين مكثفة على الكتابة والإملاء لتحسين الدقة</p>
+                    <button class="bg-dys-orange text-white px-4 py-2 rounded-lg hover:bg-dys-orange/90 transition-colors">
+                        بدء التمرين
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+                    <div class="w-12 h-12 bg-dys-green/20 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-dys-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="text-lg font-semibold text-dys-blue mb-2">تطوير التركيز</h4>
+                    <p class="text-dys-gray text-sm mb-4">ألعاب وأنشطة مصممة لتحسين الانتباه والتركيز</p>
+                    <button class="bg-dys-green text-white px-4 py-2 rounded-lg hover:bg-dys-green/90 transition-colors">
+                        بدء التمرين
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="nav-bottom fixed bottom-0 left-0 right-0 z-40 md:hidden">
+        <div class="flex justify-around items-center py-2">
+            <a href="index.html" class="nav-item flex flex-col items-center p-2">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                <span class="text-xs">الرئيسية</span>
+            </a>
+            
+            <a href="map.html" class="nav-item flex flex-col items-center p-2">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span class="text-xs">الخريطة</span>
+            </a>
+            
+            <a href="smart-tools.html" class="nav-item active flex flex-col items-center p-2">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span class="text-xs">الأدوات</span>
+            </a>
+            
+            <a href="messaging.html" class="nav-item flex flex-col items-center p-2">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                <span class="text-xs">الرسائل</span>
+            </a>
+            
+            <a href="settings.html" class="nav-item flex flex-col items-center p-2">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span class="text-xs">الحساب</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Add bottom padding to prevent content being hidden behind nav -->
+    <div class="h-20 md:hidden"></div>
+
+    <script>
+        // Smart Tools JavaScript Functionality
+        let currentTool = 'summarizer';
+        let exerciseStats = { correct: 0, wrong: 0 };
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSmartTools();
+        });
+        
+        function initializeSmartTools() {
+            // Initialize file upload
+            initFileUpload();
+            
+            // Initialize animations
+            initAnimations();
+            
+            // Show default tool
+            showTool('summarizer');
+        }
+        
+        function selectTool(toolName) {
+            // Update tool cards
+            document.querySelectorAll('.tool-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.target.closest('.tool-card').classList.add('active');
+            
+            // Show selected tool
+            showTool(toolName);
+        }
+        
+        function showTool(toolName) {
+            currentTool = toolName;
+            
+            // Hide all tool contents
+            document.querySelectorAll('.tool-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show selected tool content
+            document.getElementById(toolName + '-tool').classList.remove('hidden');
+            
+            // Animate tool appearance
+            anime({
+                targets: `#${toolName}-tool`,
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 500,
+                easing: 'easeOutExpo'
+            });
+        }
+        
+        function initFileUpload() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+            
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+        }
+        
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                console.log('File uploaded:', file.name);
+                // Here you would typically upload the file to your server
+                showNotification(`تم رفع الملف: ${file.name}`, 'success');
+            });
+        }
+        
+        function generateSummary() {
+            const btnText = document.getElementById('summarize-btn-text');
+            const loading = document.getElementById('summarize-loading');
+            const output = document.getElementById('summary-output');
+            
+            // Show loading state
+            btnText.classList.add('hidden');
+            loading.classList.remove('hidden');
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                // Generate sample summary
+                const summary = `
+                    <div class="space-y-4">
+                        <div class="bg-dys-cyan/10 p-4 rounded-xl">
+                            <h5 class="font-semibold text-dys-blue mb-2">النقاط الرئيسية:</h5>
+                            <ul class="text-sm text-dys-gray space-y-1">
+                                <li>• النقطة الأولى من التلخيص</li>
+                                <li>• النقطة الثانية المهمة</li>
+                                <li>• النقطة الثالثة الأساسية</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-xl border">
+                            <h5 class="font-semibold text-dys-blue mb-2">الملخص المبسط:</h5>
+                            <p class="text-sm text-dys-gray leading-relaxed">
+                                هذا هو الملخص المبسط للمحتوى الذي تم إدخاله. تمت معالجته باستخدام تقنيات الذكاء الاصطناعي لجعله أكثر فهمًا وسهولة للطفل.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-dys-green/10 p-4 rounded-xl">
+                            <h5 class="font-semibold text-dys-blue mb-2">الكلمات المفتاحية:</h5>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-dys-cyan/20 text-dys-cyan px-2 py-1 rounded text-xs">كلمة 1</span>
+                                <span class="bg-dys-orange/20 text-dys-orange px-2 py-1 rounded text-xs">كلمة 2</span>
+                                <span class="bg-dys-green/20 text-dys-green px-2 py-1 rounded text-xs">كلمة 3</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                output.innerHTML = summary;
+                
+                // Reset button
+                btnText.classList.remove('hidden');
+                loading.classList.add('hidden');
+                
+                showNotification('تم إنشاء الملخص بنجاح!', 'success');
+            }, 2000);
+        }
+        
+        function generateMindMap() {
+            const topic = document.getElementById('mindmap-topic').value;
+            const subtopics = Array.from(document.querySelectorAll('#subtopics-list input')).map(input => input.value);
+            
+            // Create SVG mind map
+            createMindMapSVG(topic, subtopics);
+            showNotification('تم إنشاء الخريطة الذهنية!', 'success');
+        }
+        
+        function createMindMapSVG(topic, subtopics) {
+            const svg = document.getElementById('mindmap-svg');
+            const container = document.getElementById('mindmap-container');
+            
+            // Clear existing content
+            svg.innerHTML = '';
+            
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // Draw central topic
+            const centerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            centerCircle.setAttribute('cx', centerX);
+            centerCircle.setAttribute('cy', centerY);
+            centerCircle.setAttribute('r', '40');
+            centerCircle.setAttribute('fill', '#00AEEF');
+            centerCircle.setAttribute('class', 'mind-map-node');
+            svg.appendChild(centerCircle);
+            
+            // Add topic text
+            const centerText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            centerText.setAttribute('x', centerX);
+            centerText.setAttribute('y', centerY + 5);
+            centerText.setAttribute('text-anchor', 'middle');
+            centerText.setAttribute('fill', 'white');
+            centerText.setAttribute('font-size', '12');
+            centerText.setAttribute('font-weight', 'bold');
+            centerText.textContent = topic;
+            svg.appendChild(centerText);
+            
+            // Draw subtopics
+            const angleStep = (2 * Math.PI) / subtopics.length;
+            const radius = 120;
+            
+            subtopics.forEach((subtopic, index) => {
+                const angle = index * angleStep;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                // Draw connection line
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', centerX);
+                line.setAttribute('y1', centerY);
+                line.setAttribute('x2', x);
+                line.setAttribute('y2', y);
+                line.setAttribute('class', 'mind-map-connection');
+                svg.appendChild(line);
+                
+                // Draw subtopic circle
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', '25');
+                circle.setAttribute('fill', '#8BC643');
+                circle.setAttribute('class', 'mind-map-node');
+                svg.appendChild(circle);
+                
+                // Add subtopic text
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', x);
+                text.setAttribute('y', y + 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', 'white');
+                text.setAttribute('font-size', '10');
+                text.setAttribute('font-weight', 'bold');
+                text.textContent = subtopic;
+                svg.appendChild(text);
+            });
+        }
+        
+        function addSubtopic() {
+            const list = document.getElementById('subtopics-list');
+            const newDiv = document.createElement('div');
+            newDiv.className = 'flex space-x-2';
+            newDiv.innerHTML = `
+                <input type="text" class="flex-1 p-2 border border-dys-light-gray rounded-lg focus:border-dys-orange focus:outline-none" 
+                    placeholder="عنصر فرعي جديد">
+                <button onclick="removeSubtopic(this)" class="text-dys-gray hover:text-red-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            `;
+            list.appendChild(newDiv);
+        }
+        
+        function removeSubtopic(button) {
+            button.closest('.flex').remove();
+        }
+        
+        function selectExerciseType(type) {
+            const container = document.getElementById('exercise-container');
+            
+            // Update exercise stats
+            document.getElementById('correct-answers').textContent = exerciseStats.correct;
+            document.getElementById('wrong-answers').textContent = exerciseStats.wrong;
+            
+            // Generate exercise based on type
+            let exerciseHTML = '';
+            
+            switch(type) {
+                case 'reading':
+                    exerciseHTML = createReadingExercise();
+                    break;
+                case 'writing':
+                    exerciseHTML = createWritingExercise();
+                    break;
+                case 'math':
+                    exerciseHTML = createMathExercise();
+                    break;
+                case 'attention':
+                    exerciseHTML = createAttentionExercise();
+                    break;
+            }
+            
+            container.innerHTML = exerciseHTML;
+        }
+        
+        function createReadingExercise() {
+            return `
+                <div class="p-6">
+                    <h4 class="text-lg font-semibold text-dys-blue mb-4">تمرين فهم القراءة</h4>
+                    <div class="bg-dys-light-gray p-4 rounded-xl mb-4">
+                        <p class="text-sm text-dys-gray leading-relaxed">
+                            ذهب أحمد إلى السوق مع والدته لشراء الفواكه. اشترى تفاحاً وبرتقالاً وموزاً. فرح أحمد كثيراً بالفواكه الطازجة.
+                        </p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="font-semibold text-dys-blue">ما الذي اشتراه أحمد من السوق؟</div>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="q1" value="a" class="text-dys-cyan">
+                                <span>خضار فقط</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="q1" value="b" class="text-dys-cyan">
+                                <span>فواكه فقط</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="q1" value="c" class="text-dys-cyan">
+                                <span>فواكه وخضار</span>
+                            </label>
+                        </div>
+                        <button onclick="checkAnswer('b', 'q1')" class="bg-dys-cyan text-white px-4 py-2 rounded-lg">
+                            تحقق من الإجابة
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createWritingExercise() {
+            return `
+                <div class="p-6">
+                    <h4 class="text-lg font-semibold text-dys-blue mb-4">تمرين إملائي</h4>
+                    <div class="mb-4">
+                        <p class="text-sm text-dys-gray mb-2">اكتب الكلمة التالية بالطريقة الصحيحة:</p>
+                        <div class="bg-dys-orange/10 p-3 rounded-xl">
+                            <span class="text-lg font-semibold text-dys-orange">مَكْتَبَة</span>
+                        </div>
+                    </div>
+                    <input type="text" class="w-full p-3 border border-dys-light-gray rounded-xl mb-4" 
+                        placeholder="اكتب الكلمة هنا..." id="spelling-input">
+                    <button onclick="checkSpelling('مكتبة')" class="bg-dys-orange text-white px-4 py-2 rounded-lg">
+                        تحقق من الإملاء
+                    </button>
+                </div>
+            `;
+        }
+        
+        function createMathExercise() {
+            return `
+                <div class="p-6">
+                    <h4 class="text-lg font-semibold text-dys-blue mb-4">مسألة رياضية</h4>
+                    <div class="bg-dys-green/10 p-4 rounded-xl mb-4">
+                        <p class="text-sm text-dys-gray">
+                            إذا كان عند أحمد 8 تفاحات وأعطى 3 منها لصديقه، كم تفاحة بقيت عنده؟
+                        </p>
+                    </div>
+                    <input type="number" class="w-full p-3 border border-dys-light-gray rounded-xl mb-4" 
+                        placeholder="اكتب الجواب..." id="math-input">
+                    <button onclick="checkMathAnswer(5)" class="bg-dys-green text-white px-4 py-2 rounded-lg">
+                        تحقق من الجواب
+                    </button>
+                </div>
+            `;
+        }
+        
+        function createAttentionExercise() {
+            return `
+                <div class="p-6">
+                    <h4 class="text-lg font-semibold text-dys-blue mb-4">تمرين تركيز</h4>
+                    <div class="grid grid-cols-4 gap-3 mb-4">
+                        <button class="w-16 h-16 bg-dys-cyan rounded-lg text-white font-bold text-xl" onclick="checkAttention(this, true)">5</button>
+                        <button class="w-16 h-16 bg-dys-orange rounded-lg text-white font-bold text-xl" onclick="checkAttention(this, false)">2</button>
+                        <button class="w-16 h-16 bg-dys-green rounded-lg text-white font-bold text-xl" onclick="checkAttention(this, false)">8</button>
+                        <button class="w-16 h-16 bg-dys-blue rounded-lg text-white font-bold text-xl" onclick="checkAttention(this, false)">3</button>
+                    </div>
+                    <p class="text-sm text-dys-gray mb-4">اضغط على الرقم 5 فقط!</p>
+                    <div id="attention-result"></div>
+                </div>
+            `;
+        }
+        
+        function checkAnswer(correctAnswer, questionName) {
+            const selected = document.querySelector(`input[name="${questionName}"]:checked`);
+            if (!selected) {
+                showNotification('الرجاء اختيار إجابة', 'warning');
+                return;
+            }
+            
+            if (selected.value === correctAnswer) {
+                exerciseStats.correct++;
+                showNotification('إجابة صحيحة! أحسنت!', 'success');
+            } else {
+                exerciseStats.wrong++;
+                showNotification('إجابة خاطئة. حاول مرة أخرى!', 'error');
+            }
+            
+            // Update stats
+            document.getElementById('correct-answers').textContent = exerciseStats.correct;
+            document.getElementById('wrong-answers').textContent = exerciseStats.wrong;
+        }
+        
+        function checkSpelling(correctWord) {
+            const input = document.getElementById('spelling-input').value;
+            if (input === correctWord) {
+                exerciseStats.correct++;
+                showNotification('إملاء صحيح! ممتاز!', 'success');
+            } else {
+                exerciseStats.wrong++;
+                showNotification(`إملاء خاطئ. الكلمة الصحيحة: ${correctWord}`, 'error');
+            }
+            
+            document.getElementById('correct-answers').textContent = exerciseStats.correct;
+            document.getElementById('wrong-answers').textContent = exerciseStats.wrong;
+        }
+        
+        function checkMathAnswer(correctAnswer) {
+            const input = parseInt(document.getElementById('math-input').value);
+            if (input === correctAnswer) {
+                exerciseStats.correct++;
+                showNotification('حساب صحيح! أحسنت!', 'success');
+            } else {
+                exerciseStats.wrong++;
+                showNotification(`جواب خاطئ. الجواب الصحيح: ${correctAnswer}`, 'error');
+            }
+            
+            document.getElementById('correct-answers').textContent = exerciseStats.correct;
+            document.getElementById('wrong-answers').textContent = exerciseStats.wrong;
+        }
+        
+        function checkAttention(button, isCorrect) {
+            if (isCorrect) {
+                exerciseStats.correct++;
+                button.style.backgroundColor = '#8BC643';
+                showNotification('ممتاز! تركيز جيد!', 'success');
+            } else {
+                exerciseStats.wrong++;
+                button.style.backgroundColor = '#EF4444';
+                showNotification('انتبه أكثر! حاول مرة أخرى!', 'error');
+            }
+            
+            document.getElementById('correct-answers').textContent = exerciseStats.correct;
+            document.getElementById('wrong-answers').textContent = exerciseStats.wrong;
+        }
+        
+        function clearWriting() {
+            document.getElementById('writing-input').value = '';
+            document.getElementById('writing-feedback').innerHTML = `
+                <div class="text-center text-dys-gray py-12">
+                    <svg class="w-16 h-16 text-dys-blue mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-lg font-semibold text-dys-blue mb-2">اكتب النص للحصول على التصحيح</p>
+                    <p class="text-sm text-dys-gray">بعد كتابة النص، اضغطي على "تصحيح" للحصول على ملاحظات دقيقة</p>
+                </div>
+            `;
+        }
+        
+        function showHint() {
+            showNotification('تلميح: انتبهي للحروف التي تُكتب متصلة مثل "ال" و"في"', 'info');
+        }
+        
+        function checkWriting() {
+            const input = document.getElementById('writing-input').value;
+            const original = 'ذهب أحمد إلى المدرسة صباحاً ووجد أصدقاءه يلعبون في الساحة. انضم إليهم وبدأوا يلعبون كرة القدم معاً.';
+            
+            // Simple comparison (in real app, you'd use more sophisticated NLP)
+            const feedback = document.getElementById('writing-feedback');
+            
+            if (input.trim() === '') {
+                showNotification('الرجاء كتابة النص أولاً', 'warning');
+                return;
+            }
+            
+            let html = '<div class="space-y-4">';
+            
+            // Check accuracy
+            const accuracy = calculateAccuracy(input, original);
+            html += `
+                <div class="bg-dys-cyan/10 p-4 rounded-xl">
+                    <h5 class="font-semibold text-dys-blue mb-2">دقة الكتابة: ${accuracy}%</h5>
+                    <div class="w-full bg-dys-light-gray rounded-full h-2">
+                        <div class="bg-dys-cyan h-2 rounded-full" style="width: ${accuracy}%"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Find differences
+            const differences = findDifferences(input, original);
+            if (differences.length > 0) {
+                html += `
+                    <div class="bg-dys-orange/10 p-4 rounded-xl">
+                        <h5 class="font-semibold text-dys-blue mb-2">الأخطاء التي يجب تصحيحها:</h5>
+                        <ul class="text-sm text-dys-gray space-y-1">
+                `;
+                differences.forEach(diff => {
+                    html += `<li>• ${diff}</li>`;
+                });
+                html += '</ul></div>';
+            } else {
+                html += `
+                    <div class="bg-dys-green/10 p-4 rounded-xl">
+                        <h5 class="font-semibold text-dys-blue mb-2">ممتاز! لا توجد أخطاء</h5>
+                        <p class="text-sm text-dys-gray">كتابة ممتازة مع مراعاة جميع قواعد الإملاء والترقيم</p>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            feedback.innerHTML = html;
+        }
+        
+        function calculateAccuracy(input, original) {
+            // Simple accuracy calculation
+            const inputWords = input.trim().split(' ');
+            const originalWords = original.trim().split(' ');
+            let correct = 0;
+            
+            for (let i = 0; i < Math.min(inputWords.length, originalWords.length); i++) {
+                if (inputWords[i] === originalWords[i]) correct++;
+            }
+            
+            return Math.round((correct / originalWords.length) * 100);
+        }
+        
+        function findDifferences(input, original) {
+            // Simple difference detection
+            const differences = [];
+            const inputWords = input.trim().split(' ');
+            const originalWords = original.trim().split(' ');
+            
+            for (let i = 0; i < originalWords.length; i++) {
+                if (inputWords[i] !== originalWords[i]) {
+                    differences.push(`الكلمة ${i + 1}: يجب أن تكون "${originalWords[i]}" وليس "${inputWords[i] || ''}"`);
+                }
+            }
+            
+            return differences;
+        }
+        
+        function initAnimations() {
+            // Animate floating elements
+            anime({
+                targets: '.floating-element',
+                translateY: [-10, 10],
+                duration: 3000,
+                easing: 'easeInOutSine',
+                direction: 'alternate',
+                loop: true
+            });
+        }
+        
+        // Global functions
+        window.selectTool = selectTool;
+        window.generateSummary = generateSummary;
+        window.generateMindMap = generateMindMap;
+        window.addSubtopic = addSubtopic;
+        window.removeSubtopic = removeSubtopic;
+        window.selectExerciseType = selectExerciseType;
+        window.checkAnswer = checkAnswer;
+        window.checkSpelling = checkSpelling;
+        window.checkMathAnswer = checkMathAnswer;
+        window.checkAttention = checkAttention;
+        window.clearWriting = clearWriting;
+        window.showHint = showHint;
+        window.checkWriting = checkWriting;
+        window.exportMindMap = () => showNotification('تم تصدير الخريطة الذهنية!', 'success');
+        window.saveMindMap = () => showNotification('تم حفظ الخريطة الذهنية!', 'success');
+        window.startDictation = () => showNotification('بدء الإملاء الصوتي!', 'info');
+    </script>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu">
+        <div class="mobile-menu-header">
+            <h2 class="font-bold text-dys-blue">القائمة</h2>
+            <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+        </div>
+        <div class="mobile-menu-content">
+            <a href="index.html" class="mobile-menu-item" onclick="closeMobileMenu()">
+                الرئيسية
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+            </a>
+            <a href="map.html" class="mobile-menu-item" onclick="closeMobileMenu()">
+                الخريطة
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                </svg>
+            </a>
+            <a href="smart-tools.html" class="mobile-menu-item active" onclick="closeMobileMenu()">
+                الأدوات
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                </svg>
+            </a>
+            <a href="messaging.html" class="mobile-menu-item" onclick="closeMobileMenu()">
+                الرسائل
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+            </a>
+            <a href="settings.html" class="mobile-menu-item" onclick="closeMobileMenu()">
+                الإعدادات
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Mobile Menu Functions
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const hamburger = document.getElementById('hamburger-btn');
+            
+            if (!menu || !overlay || !hamburger) return;
+            
+            if (menu.classList.contains('active')) {
+                closeMobileMenu();
+            } else {
+                menu.classList.add('active');
+                overlay.classList.add('active');
+                hamburger.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const hamburger = document.getElementById('hamburger-btn');
+            
+            if (!menu || !overlay) return;
+            
+            menu.classList.remove('active');
+            overlay.classList.remove('active');
+            if (hamburger) hamburger.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Initialize mobile menu on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Close menu when clicking on links
+            document.querySelectorAll('.mobile-menu-item').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    closeMobileMenu();
+                });
+            });
+            
+            // Close menu when pressing Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeMobileMenu();
+                }
+            });
+        });
+    </script>
+    <script src="main.js"></script>
+</body>
+</html>
